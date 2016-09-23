@@ -64,6 +64,9 @@ var DateTimePickerDirective = (function () {
     DateTimePickerDirective.prototype.ngOnChanges = function (changes) {
         if (changes['ngModel'] !== undefined) {
             this.valueChanged(changes['ngModel'].currentValue, false);
+            if (this._componentRef !== undefined) {
+                this._componentRef.instance.initDateTime(this._el['dateValue']);
+            }
         }
     };
     DateTimePickerDirective.prototype.ngOnDestroy = function () {

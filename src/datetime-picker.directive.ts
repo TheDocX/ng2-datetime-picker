@@ -78,6 +78,10 @@ export class DateTimePickerDirective implements OnInit, OnChanges, OnDestroy, Af
   public ngOnChanges (changes:SimpleChanges):void {
     if (changes['ngModel'] !== undefined) {
       this.valueChanged(changes['ngModel'].currentValue, false);
+
+      if (this._componentRef !== undefined) {
+        this._componentRef.instance.initDateTime(<Date>this._el['dateValue']);
+      }
     }
   }
 
