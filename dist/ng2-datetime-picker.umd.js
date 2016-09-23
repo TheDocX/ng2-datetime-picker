@@ -437,37 +437,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.resolver = resolver;
 	        this.viewContainerRef = viewContainerRef;
 	        this.ngModelChange = new core_1.EventEmitter();
-	        /* input element string value is changed */
-	        this.valueChanged = function (date) {
-	            console.log('value is changed to', date, typeof date);
-	            if (typeof date === 'string' && date) {
-	                _this.el['dateValue'] = _this.getDate(date);
-	            }
-	            else if (typeof date === 'object') {
-	                _this.el['dateValue'] = date;
-	            }
-	            else if (typeof date === 'undefined') {
-	                _this.el['dateValue'] = null;
-	            }
-	            _this.el.value = _this.getFormattedDateStr();
-	            _this.ngModel = _this.el['dateValue'];
-	            if (_this.ngModel) {
-	                _this.ngModel.toString = function () { return _this.el.value; };
-	                _this.ngModelChange.emit(_this.ngModel);
-	            }
-	        };
 	        this.hideDatetimePicker = function (event) {
-	            if (_this.componentRef) {
+	            if (_this._componentRef) {
 	                if (event &&
 	                    event.type === 'click' &&
-	                    event.target !== _this.el &&
-	                    !_this.elementIn(event.target, _this.datetimePickerEl)) {
-	                    _this.componentRef.destroy();
-	                    _this.componentRef = undefined;
+	                    event.target !== _this._el && !_this._elementIn(event.target, _this._datetimePickerEl)) {
+	                    _this._componentRef.destroy();
+	                    _this._componentRef = undefined;
 	                }
 	                else if (!event) {
-	                    _this.componentRef.destroy();
-	                    _this.componentRef = undefined;
+	                    _this._componentRef.destroy();
+	                    _this._componentRef = undefined;
 	                }
 	            }
 	        };
@@ -476,100 +456,136 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this.hideDatetimePicker();
 	            }
 	        };
-	        this.el = this.viewContainerRef.element.nativeElement;
+	        this._el = this.viewContainerRef.element.nativeElement;
 	    }
 	    DateTimePickerDirective.prototype.ngOnInit = function () {
-	        var _this = this;
 	        //wrap this element with a <div> tag, so that we can position dynamic elememnt correctly
 	        var wrapper = document.createElement("div");
 	        wrapper.className = 'ng2-datetime-picker';
 	        wrapper.style.display = 'inline-block';
 	        wrapper.style.position = 'relative';
-	        this.el.parentElement.insertBefore(wrapper, this.el.nextSibling);
-	        wrapper.appendChild(this.el);
+	        this._el.parentElement.insertBefore(wrapper, this._el.nextSibling);
+	        wrapper.appendChild(this._el);
 	        // add a click listener to document, so that it can hide when others clicked
 	        document.body.addEventListener('click', this.hideDatetimePicker);
-	        this.el.addEventListener('keyup', this.keyEventListener);
-	        setTimeout(function () {
-	            _this.valueChanged(_this.el.value);
-	        });
+	        this._el.addEventListener('keyup', this.keyEventListener);
+	    };
+	    DateTimePickerDirective.prototype.ngAfterViewChecked = function () {
+	        if (this._el['dateValue'] instanceof Date) {
+	            var value = this._getFormattedDateStr();
+	            if (value !== this._el.value) {
+	                this._el.value = value;
+	            }
+	        }
+	    };
+	    DateTimePickerDirective.prototype.ngOnChanges = function (changes) {
+	        if (changes['ngModel'] !== undefined) {
+	            this.valueChanged(changes['ngModel'].currentValue, false);
+	        }
 	    };
 	    DateTimePickerDirective.prototype.ngOnDestroy = function () {
 	        // add a click listener to document, so that it can hide when others clicked
 	        document.body.removeEventListener('click', this.hideDatetimePicker);
-	        this.el.removeEventListener('keyup', this.keyEventListener);
-	        if (this.datetimePickerEl) {
-	            this.datetimePickerEl.removeEventListener('keyup', this.keyEventListener);
+	        this._el.removeEventListener('keyup', this.keyEventListener);
+	        if (this._datetimePickerEl) {
+	            this._datetimePickerEl.removeEventListener('keyup', this.keyEventListener);
+	        }
+	    };
+	    /* input element string value is changed */
+	    DateTimePickerDirective.prototype.valueChanged = function (date, emit) {
+	        var _this = this;
+	        if (emit === void 0) { emit = true; }
+	        if (typeof date === 'string' && date) {
+	            this._el['dateValue'] = this._getDate(date);
+	        }
+	        else if (typeof date === 'object') {
+	            this._el['dateValue'] = date;
+	        }
+	        else {
+	            this._el['dateValue'] = null;
+	        }
+	        this._el.value = this._getFormattedDateStr();
+	        this.ngModel = this._el['dateValue'];
+	        if (this.ngModel) {
+	            this.ngModel.toString = function () {
+	                return _this._el.value;
+	            };
+	            if (emit) {
+	                this.ngModelChange.emit(this.ngModel);
+	            }
 	        }
 	    };
 	    //show datetimePicker element below the current element
 	    DateTimePickerDirective.prototype.showDatetimePicker = function () {
 	        var _this = this;
-	        if (this.componentRef) {
+	        if (this._componentRef) {
 	            return;
 	        }
 	        var factory = this.resolver.resolveComponentFactory(datetime_picker_component_1.DateTimePickerComponent);
-	        this.componentRef = this.viewContainerRef.createComponent(factory);
-	        this.datetimePickerEl = this.componentRef.location.nativeElement;
-	        this.datetimePickerEl.addEventListener('keyup', this.keyEventListener);
-	        var component = this.componentRef.instance;
-	        component.initDateTime(this.el['dateValue']);
+	        this._componentRef = this.viewContainerRef.createComponent(factory);
+	        this._datetimePickerEl = this._componentRef.location.nativeElement;
+	        this._datetimePickerEl.addEventListener('keyup', this.keyEventListener);
+	        var component = this._componentRef.instance;
+	        component.initDateTime(this._el['dateValue']);
 	        component.dateOnly = this.dateOnly;
-	        this.styleDatetimePicker();
-	        component.changes.subscribe(this.valueChanged);
+	        this._styleDatetimePicker();
+	        component.changes.subscribe(function (date) {
+	            _this.valueChanged(date);
+	        });
 	        component.closing.subscribe(function () {
 	            _this.closeOnSelect !== "false" && _this.hideDatetimePicker();
 	        });
 	    };
-	    DateTimePickerDirective.prototype.elementIn = function (el, containerEl) {
+	    DateTimePickerDirective.prototype._elementIn = function (el, containerEl) {
 	        while (el = el.parentNode) {
-	            if (el === containerEl)
+	            if (el === containerEl) {
 	                return true;
+	            }
 	        }
 	        return false;
 	    };
-	    DateTimePickerDirective.prototype.styleDatetimePicker = function () {
+	    DateTimePickerDirective.prototype._styleDatetimePicker = function () {
 	        var _this = this;
 	        // setting position, width, and height of auto complete dropdown
-	        var thisElBCR = this.el.getBoundingClientRect();
-	        this.datetimePickerEl.style.width = thisElBCR.width + 'px';
-	        this.datetimePickerEl.style.position = 'absolute';
-	        this.datetimePickerEl.style.zIndex = '1000';
-	        this.datetimePickerEl.style.left = '0';
-	        this.datetimePickerEl.style.transition = 'height 0.3s ease-in';
-	        this.datetimePickerEl.style.visibility = 'hidden';
+	        var thisElBCR = this._el.getBoundingClientRect();
+	        this._datetimePickerEl.style.width = thisElBCR.width + 'px';
+	        this._datetimePickerEl.style.position = 'absolute';
+	        this._datetimePickerEl.style.zIndex = '1000';
+	        this._datetimePickerEl.style.left = '0';
+	        this._datetimePickerEl.style.transition = 'height 0.3s ease-in';
+	        this._datetimePickerEl.style.visibility = 'hidden';
 	        setTimeout(function () {
-	            var thisElBcr = _this.el.getBoundingClientRect();
-	            var datetimePickerElBcr = _this.datetimePickerEl.getBoundingClientRect();
+	            var thisElBcr = _this._el.getBoundingClientRect();
+	            var datetimePickerElBcr = _this._datetimePickerEl.getBoundingClientRect();
 	            if (thisElBcr.bottom + datetimePickerElBcr.height > window.innerHeight) {
 	                // if not enough space to show on below, show above
-	                _this.datetimePickerEl.style.bottom = '0';
+	                _this._datetimePickerEl.style.bottom = '0';
 	            }
 	            else {
 	                // otherwise, show below
-	                _this.datetimePickerEl.style.top = thisElBcr.height + 'px';
+	                _this._datetimePickerEl.style.top = thisElBcr.height + 'px';
 	            }
-	            _this.datetimePickerEl.style.visibility = 'visible';
+	            _this._datetimePickerEl.style.visibility = 'visible';
 	        });
 	    };
 	    ;
 	    /**
 	     *  returns toString function of date object
 	     */
-	    DateTimePickerDirective.prototype.getFormattedDateStr = function () {
-	        if (this.el['dateValue']) {
+	    DateTimePickerDirective.prototype._getFormattedDateStr = function () {
+	        if (this._el['dateValue']) {
 	            if (this.dateFormat) {
-	                return datetime_1.DateTime.momentFormatDate(this.el['dateValue'], this.dateFormat);
+	                return datetime_1.DateTime.momentFormatDate(this._el['dateValue'], this.dateFormat);
 	            }
 	            else {
-	                return datetime_1.DateTime.formatDate(this.el['dateValue'], this.dateOnly);
+	                return datetime_1.DateTime.formatDate(this._el['dateValue'], this.dateOnly);
 	            }
 	        }
 	        else {
 	            return null;
 	        }
 	    };
-	    DateTimePickerDirective.prototype.getDate = function (arg) {
+	    DateTimePickerDirective.prototype._getDate = function (arg) {
 	        var date;
 	        if (typeof arg === 'string') {
 	            if (this.dateFormat) {
@@ -612,7 +628,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            host: {
 	                '(click)': 'showDatetimePicker()',
 	                '(focus)': 'showDatetimePicker()',
-	                '(change)': 'valueChanged()'
+	                '(change)': 'valueChanged($event)'
 	            }
 	        }), 
 	        __metadata('design:paramtypes', [core_1.ComponentFactoryResolver, core_1.ViewContainerRef])
