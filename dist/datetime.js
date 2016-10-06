@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var moment = require("moment");
 var core_1 = require("@angular/core");
 var DateTime = (function () {
     function DateTime() {
@@ -28,7 +29,39 @@ var DateTime = (function () {
             { fullName: 'November', shortName: 'Nov' },
             { fullName: 'December', shortName: 'Dec' }
         ];
-        this.days = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
+        this.days = [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+        ];
         /**
          * According to International Standard ISO 8601, Monday is the first day of the week
          * followed by Tuesday, Wednesday, Thursday, Friday, Saturday,
@@ -44,22 +77,17 @@ var DateTime = (function () {
             { fullName: 'Friday', shortName: 'Fr' },
             { fullName: 'Saturday', shortName: 'Sa', weekend: true }
         ];
-        /**
-         * if momentjs is available, use momentjs localized months, week, etc.
-         */
-        if (typeof moment !== 'undefined') {
-            this.months = this.months.map(function (el, index) {
-                el.fullName = moment.months()[index];
-                el.shortName = moment.monthsShort()[index];
-                return el;
-            });
-            this.daysOfWeek = this.daysOfWeek.map(function (el, index) {
-                el.fullName = moment.weekdays()[index];
-                el.shortName = moment.weekdaysShort()[index].substr(0, 2);
-                return el;
-            });
-            this.firstDayOfWeek = moment.localeData().firstDayOfWeek();
-        }
+        this.months = this.months.map(function (el, index) {
+            el.fullName = moment.months()[index];
+            el.shortName = moment.monthsShort()[index];
+            return el;
+        });
+        this.daysOfWeek = this.daysOfWeek.map(function (el, index) {
+            el.fullName = moment.weekdays()[index];
+            el.shortName = moment.weekdaysShort()[index].substr(0, 2);
+            return el;
+        });
+        this.firstDayOfWeek = moment.localeData().week.dow;
         this.firstDayOfWeek = this.firstDayOfWeek || 0;
         this.localizedDaysOfWeek = this.daysOfWeek
             .concat(this.daysOfWeek)
@@ -92,15 +120,9 @@ var DateTime = (function () {
     };
     ;
     DateTime.momentFormatDate = function (d, dateFormat) {
-        if (typeof moment === 'undefined') {
-            console.error("momentjs is required with dateFormat.\n        please add <script src=\"moment.min.js\"></script>\"> in your html.");
-        }
         return moment(d).format(dateFormat);
     };
     DateTime.momentParse = function (dateStr) {
-        if (typeof moment === 'undefined') {
-            console.error("momentjs is required with dateFormat.\n        please add <script src=\"moment.min.js\"></script>\"> in your html.");
-        }
         return moment(dateStr).toDate();
     };
     DateTime.formatDate = function (d, dateOnly) {
