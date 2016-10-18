@@ -37,4 +37,6 @@ export declare class DateTimePickerComponent implements AfterViewInit {
      * show prev/next month calendar
      */
     updateMonthData(num: number): void;
+    setToday(): void;
+    setNow(): void;
 }

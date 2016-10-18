@@ -29,6 +29,10 @@ import {DateTime} from './datetime';
      </span>
     {{monthData.year}}
     <button type="button" class="next" (click)="updateMonthData(+1)">&raquo;</button>
+    <div class="today">
+        <button type="button" (click)="setToday()">today</button>
+        <button type="button" (click)="setNow()" *ngIf="!dateOnly">now</button>
+    </div>
   </div>
 
   <div class="days">
@@ -143,6 +147,12 @@ import {DateTime} from './datetime';
 }
 .datetime-picker > .month > button.next {
     right: 10px;
+}
+.datetime-picker > .month > .today {
+    margin: 5px 0;
+}
+.datetime-picker > .month > .today button {
+    font-size: 12px;
 }
 .datetime-picker > .days {
     width: 210px; /* 30 x 7 */
@@ -300,6 +310,18 @@ export class DateTimePickerComponent implements AfterViewInit {
    */
   public updateMonthData (num:number) {
     this.monthData = this.dateTime.getMonthData(this.monthData.year, this.monthData.month + num);
+  }
+
+  public setToday () {
+    this.selectedDate = this.today;
+    this.changes.emit(this.selectedDate);
+    this.closing.emit(true);
+  }
+
+  public setNow () {
+    this.selectedDate = new Date();
+    this.changes.emit(this.selectedDate);
+    this.closing.emit(true);
   }
 
 }
